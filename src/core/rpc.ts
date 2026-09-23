@@ -1,7 +1,7 @@
 import type { ChainConfig } from "./chains.js";
 import { redactRpcUrl } from "./secrets.js";
 
-export type RpcStatus = "Connected" | "Wrong network" | "Unavailable" | "Send-only";
+export type RpcStatus = "Connected" | "Wrong network" | "Unavailable";
 
 export type RpcEndpoint = {
   url: string;
