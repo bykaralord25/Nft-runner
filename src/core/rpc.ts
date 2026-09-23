@@ -1,7 +1,7 @@
 import type { ChainConfig } from "./chains.js";
 import { redactRpcUrl } from "./secrets.js";
 
-export type RpcStatus = "Connected" | "Wrong network" | "Unavailable" | "Send-only";
+export type RpcStatus = "Connected" | "Wrong network" | "Unavailable";
 
 export type RpcEndpoint = {
   url: string;
@@ -70,11 +70,9 @@ export async function classifyRpcUrl(url: string, chain: ChainConfig): Promise<R
       broadcastCapable: true
     };
   } catch (error) {
-    const sendOnly = await looksBroadcastOnly(url);
     return {
       ...base,
-      status: sendOnly ? "Send-only" : "Unavailable",
-      broadcastCapable: sendOnly,
+      status: "Unavailable",
       error: error instanceof Error ? error.message : "RPC unavailable"
     };
   }
@@ -84,22 +82,6 @@ export async function classifyRpcUrls(urls: string[], chain: ChainConfig): Promi
   return Promise.all(urls.map((url) => classifyRpcUrl(url, chain)));
 }
 
-async function looksBroadcastOnly(url: string): Promise<boolean> {
-  try {
-    const client = new JsonRpcClient(url);
-    await client.call("eth_sendRawTransaction", ["0x"]);
-    return true;
-  } catch (error) {
-    const message = error instanceof Error ? error.message.toLowerCase() : "";
-    return (
-      message.includes("raw transaction") ||
-      message.includes("rlp") ||
-      message.includes("decode") ||
-      message.includes("invalid transaction") ||
-      message.includes("transaction type")
-    );
-  }
-}
 
 export function healthyReadEndpoint(endpoints: RpcEndpoint[]): RpcEndpoint | undefined {
   return endpoints.find((endpoint) => endpoint.status === "Connected" && endpoint.readCapable);
