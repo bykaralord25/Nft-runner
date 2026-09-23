@@ -6,12 +6,13 @@ import { CHAINS, getChain, listChains } from "../src/core/chains.js";
 import { parseNftTarget } from "../src/core/target.js";
 import { validateGas } from "../src/core/gas.js";
 import { validateQuantity } from "../src/core/quantity.js";
-import { classifyRpcUrl } from "../src/core/rpc.js";
+import { assertSafeRpcUrl, classifyRpcUrl } from "../src/core/rpc.js";
 import { seaDropInterface } from "../src/core/seadrop.js";
 import { calculateAffordability } from "../src/core/affordability.js";
 import { nextState } from "../src/core/state-machine.js";
 import { redactRpcUrl, redactText } from "../src/core/secrets.js";
 import { SessionStore } from "../src/server/session-store.js";
+import { walletFromPrivateKey } from "../src/core/wallets.js";
 
 describe("chain registry", () => {
   it("contains the required production chains", () => {
@@ -174,5 +175,19 @@ describe("session expiration", () => {
     });
     session.expiresAt = Date.now() - 1;
     assert.throws(() => store.get(session.id), /expired/);
+  });
+});
+
+
+describe("security hardening", () => {
+  it("rejects unsafe RPC URL schemes and embedded credentials", () => {
+    assert.throws(() => assertSafeRpcUrl("file:///tmp/rpc"), /http or https/);
+    assert.throws(() => assertSafeRpcUrl("https://user:pass@example.com"), /credentials/);
+    assert.doesNotThrow(() => assertSafeRpcUrl("https://example.com/rpc"));
+  });
+
+  it("rejects malformed private keys before provider access", async () => {
+    const provider = new JsonRpcProvider("http://127.0.0.1:1", 1, { staticNetwork: true });
+    await assert.rejects(() => walletFromPrivateKey("test", "not-a-private-key", provider), /32-byte hex/);
   });
 });

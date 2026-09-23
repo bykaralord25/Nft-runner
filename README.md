@@ -44,8 +44,8 @@ Use fresh mint wallets with limited balances. Never paste a main wallet key.
 - Run the commands below in Terminal.
 
 ```bash
-git clone https://github.com/UfukNode/nft-mint-runner.git
-cd nft-mint-runner
+git clone https://github.com/bykaralord25/Nft-runner.git
+cd Nft-runner
 npm install
 npm start
 ```
@@ -60,25 +60,19 @@ Local: http://localhost:3000
 
 If 3000 is already busy, the app automatically uses the next free port and prints it.
 
-
 ---
 
 ## Run with Codespaces:
 
 1. Open the repository on GitHub.
-3. Create a Codespace.
-
-<img width="2916" height="1254" alt="Adsız tasarım (8)" src="https://github.com/user-attachments/assets/04c5f3a0-314a-4d2e-a837-4b65c9f0643e" />
-
-5. Run:
+2. Create a Codespace.
+3. Run:
 
 ```bash
 npm start
 ```
 
-4. Open forwarded port:
-
-<img width="936" height="296" alt="Adsız tasarım (9)" src="https://github.com/user-attachments/assets/9d6ff385-abc1-4938-ad62-4b10270b53d8" />
+4. Open the forwarded port from the Ports tab.
 
 ---
 

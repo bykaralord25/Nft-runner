@@ -2,44 +2,24 @@ import { Wallet, getAddress } from "ethers";
 import type { JsonRpcProvider } from "ethers";
 import { shortAddress } from "./format.js";
 
-export type WalletRecord = {
-  id: string;
-  address: string;
-  shortAddress: string;
-  balanceWei: bigint;
-};
-
-export type SensitiveWallet = WalletRecord & {
-  wallet: Wallet;
-};
+export type WalletRecord = { id: string; address: string; shortAddress: string; balanceWei: bigint; };
+export type SensitiveWallet = WalletRecord & { wallet: Wallet; };
 
 export async function walletFromPrivateKey(id: string, privateKey: string, provider: JsonRpcProvider): Promise<SensitiveWallet> {
-  const wallet = new Wallet(privateKey.trim(), provider);
+  const normalized = privateKey.trim();
+  if (!/^0x[a-fA-F0-9]{64}$/.test(normalized)) {
+    throw new Error("Private key must be a 32-byte hex value beginning with 0x.");
+  }
+  const wallet = new Wallet(normalized, provider);
   const address = getAddress(wallet.address);
   const balanceWei = await provider.getBalance(address);
-  return {
-    id,
-    address,
-    shortAddress: shortAddress(address),
-    balanceWei,
-    wallet
-  };
+  return { id, address, shortAddress: shortAddress(address), balanceWei, wallet };
 }
 
 export async function refreshWalletBalances(wallets: SensitiveWallet[], provider: JsonRpcProvider): Promise<SensitiveWallet[]> {
-  return Promise.all(
-    wallets.map(async (wallet) => ({
-      ...wallet,
-      balanceWei: await provider.getBalance(wallet.address)
-    }))
-  );
+  return Promise.all(wallets.map(async (wallet) => ({ ...wallet, balanceWei: await provider.getBalance(wallet.address) })));
 }
 
 export function publicWallet(record: SensitiveWallet): WalletRecord {
-  return {
-    id: record.id,
-    address: record.address,
-    shortAddress: record.shortAddress,
-    balanceWei: record.balanceWei
-  };
+  return { id: record.id, address: record.address, shortAddress: record.shortAddress, balanceWei: record.balanceWei };
 }
