@@ -131,6 +131,7 @@ export class SessionStore {
       session.timer = undefined;
     }
     session.prepared = [];
+    session.wallets = [];
     session.results = [];
     session.state = "CANCELLED";
     return session;
